@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - OrdersSvcApplication",
+            "request": "launch",
+            "mainClass": "com.basharallabadi.istiodemo.orderssvc.OrdersSvcApplication",
+            "projectName": "orders-svc"
+        }
+    ]
+}
