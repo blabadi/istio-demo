@@ -1,3 +1,20 @@
+# Code Usage
+
+- microservices code is in ./code
+    ```
+      ui 
+      -> gateway 
+          -> orders 
+            -> shipping
+          -> shipping
+    ```
+- 
+
+
+
+
+
+---
 # Istio
 
 ## infrastucture

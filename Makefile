@@ -5,12 +5,14 @@ INGRESS_HOST=$(shell kubectl -n istio-system get service istio-ingressgateway -o
 INGRESS_PORT=$(shell kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
 SECURE_INGRESS_PORT=$(shell kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].port}')
 ISTIO_GATEWAY_URL=$(INGRESS_HOST):$(INGRESS_PORT)
+
 # local dev
 init:
 	cd ./code/ui-app && npm i 
 	cd ./code/api-gateway && npm i 
 	cd ./code/shipping-svc && npm i 
 	cd ./code/users-svc && npm i
+	cd ./code/orders-svc && ./mvnw install
 
 run-local:
 	GATEWAY_URL=http://localhost:3003 nohup node ./code/ui-app/index.js &
@@ -47,7 +49,15 @@ i-get:
 i-init:
 	-kubectl create namespace istio-system
 	-kubectl label namespace default istio-injection=enabled --overwrite
-	helm template $(ISTIO_HOME)/$(ISTIO_DIR)/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system | kubectl apply -f -
+	# the below settings should match or the 2nd command will hang
+	helm template $(ISTIO_HOME)/$(ISTIO_DIR)/install/kubernetes/helm/istio-init \
+	--name istio-init \
+	--namespace istio-system \
+	--set global.mtls.enabled=true \
+	--set tracing.enabled=true \
+	--set servicegraph.enabled=true \
+	--set grafana.enabled=true \
+	| kubectl apply -f -
 	helm template $(ISTIO_HOME)/$(ISTIO_DIR)/install/kubernetes/helm/istio \
 	--name istio \
 	--namespace istio-system \
