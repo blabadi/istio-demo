@@ -56,8 +56,7 @@ i-init:
 	--set global.mtls.enabled=true \
 	--set tracing.enabled=true \
 	--set servicegraph.enabled=true \
-	--set grafana.enabled=true \
-	| kubectl apply -f -
+	--set grafana.enabled=true | kubectl apply -f -
 	helm template $(ISTIO_HOME)/$(ISTIO_DIR)/install/kubernetes/helm/istio \
 	--name istio \
 	--namespace istio-system \

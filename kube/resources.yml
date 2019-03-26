@@ -79,6 +79,7 @@ spec:
       containers:
       - name: frontend
         image: basharlabadi/istio-demo.frontend:1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
 ---
@@ -101,6 +102,7 @@ spec:
       containers:
       - name: gateway
         image: basharlabadi/istio-demo.gateway:1.0.0
+        imagePullPolicy: Always
         # resources:
         #   limits:
         #     memory: "256Mi"
@@ -127,6 +129,7 @@ spec:
       containers:
       - name: users
         image: basharlabadi/istio-demo.users:1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 3001
 ---
@@ -149,6 +152,7 @@ spec:
       containers:
       - name: orders
         image: basharlabadi/istio-demo.orders:1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 3002
 ---
@@ -174,5 +178,6 @@ spec:
       containers:
       - name: shipping
         image: basharlabadi/istio-demo.shipping:1.0.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 3005 

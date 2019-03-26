@@ -1,14 +1,16 @@
 # Code Usage
 
-- microservices code is in ./code
-    ```
-      ui 
-      -> gateway 
-          -> orders 
-            -> shipping
-          -> shipping
-    ```
-- 
+- Microservices code is in ./code
+  ```
+    ui (node)
+    -> gateway (node)
+        -> orders (java)
+          -> shipping (node)
+        -> shipping (node)
+  ```
+
+- Istio resources under ./istio
+  - ingress: contains the gateway 
 
 
 

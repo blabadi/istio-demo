@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: frontend
+  name: dr.frontend
 spec:
   host: frontend
   trafficPolicy:
@@ -15,7 +15,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: gateway
+  name: dr.gateway
 spec:
   host: gateway
   trafficPolicy:
@@ -29,7 +29,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: users
+  name: dr.users
 spec:
   host: users
   trafficPolicy:
@@ -43,7 +43,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: orders
+  name: dr.orders
 spec:
   host: orders
   trafficPolicy:
@@ -57,7 +57,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: shipping
+  name: dr.shipping
 spec:
   host: shipping  
   trafficPolicy:
