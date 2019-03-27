@@ -67,7 +67,8 @@ i-init:
 	--set sidecarInjectorWebhook.enabled=true \
 	--set servicegraph.enabled=true \
 	--set grafana.enabled=true | kubectl apply -f -
-
+	kubectl get svc -n istio-system
+	kubectl get pods -n istio-system
 # to see the istio generated configs :	
 i-gen:
 	helm template $(ISTIO_HOME)/$(ISTIO_DIR)/install/kubernetes/helm/istio \
@@ -78,13 +79,12 @@ i-gen:
 k-deploy:
 	kubectl apply -f ./kube/resources.yml
 
-# if auto injection not working
+# if auto injection not working (https://github.com/istio/istio/issues/7266)
 i-inject-deploy:
 	$(ISTIO_HOME)/$(ISTIO_DIR)/bin/istioctl kube-inject -f ./kube/resources.yml  | kubectl apply -f -
 
 k-print:
 	kubectl get pods && kubectl get svc && kubectl get svc istio-ingressgateway -n istio-system
-	kubectl get svc -n istio-system
 
 k-test:
 	kubectl exec -it $(shell kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}') -c frontend -- wget -qO- http://users/ | cat
