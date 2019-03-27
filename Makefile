@@ -56,12 +56,15 @@ i-init:
 	--set global.mtls.enabled=true \
 	--set tracing.enabled=true \
 	--set servicegraph.enabled=true \
+	--set sidecarInjectorWebhook.enabled=true \
 	--set grafana.enabled=true | kubectl apply -f -
+	sleep 10
 	helm template $(ISTIO_HOME)/$(ISTIO_DIR)/install/kubernetes/helm/istio \
 	--name istio \
 	--namespace istio-system \
 	--set global.mtls.enabled=true \
 	--set tracing.enabled=true \
+	--set sidecarInjectorWebhook.enabled=true \
 	--set servicegraph.enabled=true \
 	--set grafana.enabled=true | kubectl apply -f -
 
@@ -75,8 +78,13 @@ i-gen:
 k-deploy:
 	kubectl apply -f ./kube/resources.yml
 
+# if auto injection not working
+i-inject-deploy:
+	$(ISTIO_HOME)/$(ISTIO_DIR)/bin/istioctl kube-inject -f ./kube/resources.yml  | kubectl apply -f -
+
 k-print:
 	kubectl get pods && kubectl get svc && kubectl get svc istio-ingressgateway -n istio-system
+	kubectl get svc -n istio-system
 
 k-test:
 	kubectl exec -it $(shell kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}') -c frontend -- wget -qO- http://users/ | cat
