@@ -208,3 +208,13 @@ sample project:
 
 references:
   istio doc + sample project
+
+cheat sheets: 
+- https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+- print pods and their nodes:
+kubectl get pod -o=custom-columns=NODE:.spec.nodeName,NAME:.metadata.name --all-namespaces
+- cat /proc/cpuinfo | grep processor
+
+restart an istio deployment : 
+kubectl scale deployment istio-telemetry --replicas=0 -n istio-system
+kubectl scale deployment istio-telemetry --replicas=1 -n istio-system
