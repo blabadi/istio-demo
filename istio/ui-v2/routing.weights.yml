@@ -1,3 +1,5 @@
+# traffic shifting: https://istio.io/docs/tasks/traffic-management/traffic-shifting/
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -13,5 +15,12 @@ spec:
         host: frontend
         port: 
           number: 80
+        subset: v2
+      weight: 30
+    - destination:
+        host: frontend
+        port: 
+          number: 80
         subset: v1
----
+      weight: 70
+
