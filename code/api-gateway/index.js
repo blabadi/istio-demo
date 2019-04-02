@@ -15,9 +15,10 @@ app.get('/', async (req, res) => {
 app.get('/api/user/:id/orders', async (req, res) => {
   let user;
   let order;
+  const headers = forwardTraceHeaders(req)
   try {
-    user = await callUserService();
-    order = await callOrderSvc();
+    user = await callUserService(headers);
+    order = await callOrderSvc(headers);
     console.log(` user: ${user}, order ${order}`)
   } catch (err) {
     console.log(`error : ${err}`)
@@ -33,16 +34,38 @@ app.get('/api/user/:id/orders', async (req, res) => {
   return res.json(result);
 });
 
-const callUserService = async () => {
+const callUserService = async (headers) => {
   return await request({
-			url: `${USER_UPSTREAM}/user/1`,
+      url: `${USER_UPSTREAM}/user/1`,
+      headers
   });
 }
 
-const callOrderSvc = async () => {
+const callOrderSvc = async (headers) => {
   return await request({
-			url: `${ORDER_UPSTREAM}/order?userId=1`,
+      url: `${ORDER_UPSTREAM}/order?userId=1`,
+      headers
   });
+}
+
+
+function forwardTraceHeaders(req) {
+	incoming_headers = [
+		'x-request-id',
+		'x-b3-traceid',
+		'x-b3-spanid',
+		'x-b3-parentspanid',
+		'x-b3-sampled',
+		'x-b3-flags',
+		'x-ot-span-context',
+		'x-snowflake',
+	]
+	const headers = {}
+	for (let h of incoming_headers) {
+		if (req.header(h))
+			headers[h] = req.header(h)
+	}
+	return headers
 }
 
 app.listen(port, () => console.log(`api gateway listening on port ${port}!`))

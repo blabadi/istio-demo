@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: dr.frontend
+spec:
+  host: frontend
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  # we have to also include the v1 here otherwise wont work
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2

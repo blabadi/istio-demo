@@ -1,0 +1,25 @@
+# request routing: https://istio.io/docs/tasks/traffic-management/request-routing/
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: vs.frontend
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - my-gateway
+  http:
+  - match:
+    - headers:
+        x-end-user:
+          exact: canary-user
+    route:
+    - destination:
+        host: frontend
+        subset: v2
+  - route:
+    - destination:
+        host: frontend
+        port: 
+          number: 80
+        subset: v1

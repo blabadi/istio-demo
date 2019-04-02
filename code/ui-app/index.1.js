@@ -21,9 +21,7 @@ app.get('/', async (req, res) => {
   }
 
   console.log(`${new Date()} response gateway ${upResp} `);
-  const result = `
-      <h1>Version v2</h1>
-      <div>Hello!</div>
+  const result = `<div>Hello!</div>
       <div>User: ${userOrder.user.name} Orders: </div>
       <div>id : ${userOrder.order.id}</div>
       <div>status : ${userOrder.order.status.status}</div>
@@ -41,7 +39,6 @@ function forwardTraceHeaders(req) {
 		'x-b3-sampled',
 		'x-b3-flags',
 		'x-ot-span-context',
-		'x-end-user',
 	]
 	const headers = {}
 	for (let h of incoming_headers) {

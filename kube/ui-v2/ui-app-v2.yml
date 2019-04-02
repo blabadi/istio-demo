@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # names should avoid using . (dot) in their names otherwise it causes istio to report service name as unknown
+  name: frontend-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: frontend
+        version: v2
+    spec:
+      containers:
+      - name: frontend
+        image: basharlabadi/istio-demo.frontend:2.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000 
