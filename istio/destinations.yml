@@ -21,6 +21,9 @@ spec:
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+    # load balancing https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/#LoadBalancerSettings
+    loadBalancer:
+        simple: ROUND_ROBIN
   subsets:
   - name: v1
     labels:

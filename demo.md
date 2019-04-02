@@ -1,4 +1,4 @@
-# Demo script
+# Demo script (Monitoring And Traffic Management)
 
 ## setup
  - start cluster `make kluster`
@@ -20,6 +20,11 @@
 
 ## features:
 
+### networking 
+    - service discovery
+    - routing
+    - enforce polices & security
+
 ### monitoring
 `make demo-monitoring`
 - Grafana : http://localhost:3000
@@ -28,6 +33,8 @@
 - service graph: http://localhost:8088/dotviz
 
 ### traffic management:
+- load balancing:
+    - see `istio/destinations.yml` => `dr.gateway `
 - canary deployment: `make ui-v2`
     - compare `make demo-frontend` with canary : `make canary-header` 
 
@@ -37,5 +44,19 @@
 - fault injection: `make faulty-shipping`
     - `make gen-traffic &`
     - check monitors
-    - `make stop-traffic`
+    - `make stop-traffic` or ^C
+    - remove fault injection: `make rm-faulty-shipping`
+
+- timeout & retry:
+    - `make timeout-retry`
+    - `make rm-timeout-retry`
+
+- mirroring:
+    - `make mirror-frontend`
+    - execute requests on frontend
+    - check jaeger for shadow requests
+    - `make rm-mirror-frontend`
+
+
+- circuit breaking
 

@@ -195,7 +195,28 @@ canary-header:
         	-H 'x-end-user: canary-user'
 
 faulty-shipping:
-	kubectl apply -f ./istio/fault-injection/shipping-dr.yml
+	kubectl apply -f ./istio/fault-injection/shipping-vs.yml
+
+rm-faulty-shipping:
+	kubectl delete -f ./istio/fault-injection/shipping-vs.yml
+
+timeout-retry:
+	kubectl apply -f ./istio/timeout-retry/shipping-vs.yml
+	kubectl apply -f ./istio/timeout-retry/orders-vs.yml
+
+rm-timeout-retry:
+	kubectl delete -f ./istio/timeout-retry/shipping-vs.yml
+	kubectl delete -f ./istio/timeout-retry/orders-vs.yml
+
+mirror-frontend:
+	kubectl apply -f ./kube/ui-v2/ui-app-v2.yml
+	kubectl apply -f ./istio/mirroring/dest-rule.yml
+	kubectl apply -f ./istio/mirroring/mirror-frontend-v2.yml
+
+rm-mirror-frontend:
+	kubectl delete -f ./kube/ui-v2/ui-app-v2.yml
+	kubectl delete -f ./istio/mirroring/dest-rule.yml
+	kubectl delete -f ./istio/mirroring/mirror-frontend-v2.yml
 
 # if in the background
 stop-monitoring:

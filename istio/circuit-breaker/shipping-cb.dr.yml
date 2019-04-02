@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: shipping-cb-policy
+spec:
+  host: shipping
+  trafficPolicy:
+  # https://istio.io/docs/tasks/traffic-management/circuit-breaking/
+    connectionPool:
+      tcp:
+        maxConnections: 5
+      http:
+        http1MaxPendingRequests: 10
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutiveErrors: 10
+      interval: 5s
+      baseEjectionTime: 5m

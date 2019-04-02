@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: vs.orders
+spec:
+  hosts:
+  - orders
+  http:
+  - route:
+    - destination:
+        host: orders
+        subset: v1
+    timeout: 3s
+    # time between retries is 25ms+ controlled by istio
+    retries: # retries by default don't work on timeout # https://www.envoyproxy.io/docs/envoy/latest/configuration/http_filters/router_filter#x-envoy-retry-on
+      attempts: 1 # increase this to see that success rate increases
+      perTryTimeout: 2s
+      retryOn: 5xx 
