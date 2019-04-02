@@ -17,10 +17,11 @@
 
 
 ---
-# Istio
+# Istio intro
 
 ## infrastucture
 prerequiset: k8s cluster
+
 ## Istio setup
 - download https://istio.io/docs/setup/kubernetes/install/kubernetes/
 - create profile:
@@ -32,8 +33,6 @@ prerequiset: k8s cluster
 
    # install profile
    $ helm template <istio-home>/install/kubernetes/helm/istio --name istio --namespace istio-system --set global.mtls.enabled=true --set tracing.enabled=true --set servicegraph.enabled=true --set grafana.enabled=true > istio.yaml
-
-   $ kubectl apply -f istio.yaml
    ```
    or you can do `helm install`, see: https://istio.io/docs/setup/kubernetes/install/helm/
 
@@ -50,7 +49,7 @@ prerequiset: k8s cluster
 
 ## Using Istio
 
-1- deploy application pods  (platform resources)
+1- deploy your application pods  (platform resources)
   - k8s Deployments(replicaset + pods) + services
   `kubectl apply -f project/k8s/services.yaml`
   `kubectl apply -f project/k8s/deployments.yaml`
@@ -60,8 +59,8 @@ prerequiset: k8s cluster
 ### Traffic management:
   - ingress (gateway):
     - category: traffic management / networking
+    - load balancer / edge of the mesh
     - docs: https://istio.io/docs/reference/config/networking/v1alpha3/gateway/
-    - contains a Gateway + Virtual service (to route requests to specific apis)
     ```yaml
     apiVersion: networking.istio.io/v1alpha3
     kind: Gateway
@@ -77,7 +76,7 @@ prerequiset: k8s cluster
           protocol: HTTP
         hosts:
           - my.host.com
-     ---
+     --- 
     apiVersion: networking.istio.io/v1alpha3
     kind: VirtualService
     metadata:
@@ -94,10 +93,10 @@ prerequiset: k8s cluster
             port:
               number: 80
     ```
-  - destination rules:
+  - Destination rules:
     - https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/
-    - define all rules that should be applied after a route occured:
-      - load balancing
+    - define all rules that should be applied after a destination route is decided:
+      - load shifting/ request routing
       - connection pooling & circuit breaking
     - label specific policies can be specified (subsets)
     ```yaml
@@ -122,7 +121,8 @@ prerequiset: k8s cluster
         trafficPolicy:
           loadBalancer:
             simple: ROUND_ROBIN
-        ```
+      ```
+
   - Virtual services:
     - https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/
     - manage everything in the context of routing

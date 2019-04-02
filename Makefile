@@ -24,7 +24,7 @@ ISTIO_GATEWAY_URL=$($(GATEWAY_TYPE)_GATEWAY_URL)
 
 
 ## Monitoring services
-ZIPKIN_POD_NAME=$(shell kubectl -n istio-system get pod -l app=zipkin -o jsonpath='{.items[0].metadata.name}')
+ZIPKIN_POD_NAME=$(shell kubectl -n istio-system get pod -l app=jaeger -o jsonpath='{.items[0].metadata.name}')
 JAEGER_POD_NAME=$(shell kubectl -n istio-system get pod -l app=jaeger -o jsonpath='{.items[0].metadata.name}')
 SERVICEGRAPH_POD_NAME=$(shell kubectl -n istio-system get pod -l app=servicegraph -o jsonpath='{.items[0].metadata.name}')
 GRAFANA_POD_NAME=$(shell kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}')
@@ -60,7 +60,7 @@ d-build:
 
 d-push:
 	docker login
-	docker push basharlabadi/istio-demo.frontend:1.0.0
+	docker push basharlabadi/istio-demo.frontend:2.0.0
 	docker push basharlabadi/istio-demo.gateway:1.0.0 
 	docker push basharlabadi/istio-demo.users:1.0.0 
 	docker push basharlabadi/istio-demo.orders:1.0.0 
@@ -73,7 +73,11 @@ step-1: init d-build d-push
 # INFRA -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # i stands for istio, k for kubectl
 # download istio (locally to be used by kubectl)
-
+kluster:
+	kind create cluster --name=istio-demo --config=./KinD/kind-cluster.yaml
+	export KUBECONFIG="$(kind get kubeconfig-path --name="istio-demo")"
+	kubectl cluster-info
+	
 i-get:
 	-mkdir -p $(ISTIO_HOME)
 	wget https://github.com/istio/istio/releases/download/$(ISTIO_VERSION)/$(ISTIO_DIR)-linux.tar.gz -O $(ISTIO_HOME)/$(ISTIO_DIR)-linux.tar.gz
@@ -89,6 +93,7 @@ i-init:
 	--set global.mtls.enabled=true \
 	--set tracing.enabled=true \
 	--set servicegraph.enabled=true \
+	--set pilot.traceSampling=95 \
 	--set grafana.enabled=true | kubectl apply -f -
 	sleep 20
 	helm template $(ISTIO_DIR_PATH)/install/kubernetes/helm/istio \
@@ -96,6 +101,7 @@ i-init:
 	--namespace istio-system \
 	--set global.mtls.enabled=true \
 	--set tracing.enabled=true \
+	--set pilot.traceSampling=95 \
 	--set servicegraph.enabled=true \
 	--set grafana.enabled=true | kubectl apply -f -
 	kubectl get svc -n istio-system
@@ -120,10 +126,6 @@ i-gen:
 	--set grafana.enabled=true > ./istio/gen/istio.yaml	
 
 # provision (needs auto injection for istio to work here)
-# (optional prep) set the context 
-k-ctx:
-	kubectl config set-context $(shell kubectl config current-context) --namespace=$(K8S_NAMESPACE)
-
 # (skip if auto injection disabled and execute: i-inject-deploy)
 k-deploy:
 	kubectl apply -f ./kube/resources.yml
@@ -133,13 +135,13 @@ i-inject-deploy:
 	$(ISTIO_DIR_PATH)/bin/istioctl kube-inject -f ./kube/resources.yml  | kubectl apply -f -
 
 k-print:
-	-kubectl get pods && kubectl get svc && kubectl get svc istio-ingressgateway -n istio-system
+	-kubectl get pods && kubectl get svc
 	-kubectl get svc -n istio-system -o wide
 	-kubectl get pods -n istio-system -o wide
 
 k-test:
-	kubectl exec -it $(shell kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}') -c frontend -- wget -qO- http://users/ | cat
-	kubectl exec -it $(shell kubectl get pod -l app=orders -o jsonpath='{.items[0].metadata.name}') -c orders -- wget -qO- http://shipping/ | cat
+	kubectl exec -it $(shell kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}') -c frontend -- wget -qO- http://users/ | cat - && echo ''
+	kubectl exec -it $(shell kubectl get pod -l app=orders -o jsonpath='{.items[0].metadata.name}') -c orders -- wget -qO- http://shipping/ | cat - && echo ''
 
 i-dest-rule:
 	kubectl apply -f ./istio/destinations.yml
@@ -151,9 +153,10 @@ i-ingress:
 	kubectl apply -f ./istio/ingress.yml
 	kubectl get gateway
 
-deploy-all: i-init k-deploy i-dest-rule i-routing-1 i-ingress
-# DEMO -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+i-deploy-initial: i-init k-deploy i-dest-rule i-routing-1 i-ingress
 
+
+# DEMO -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 demo-frontend: # depends on >> i-ingress & i-routing-1
 	curl -sS http://$(ISTIO_GATEWAY_URL)/
 
@@ -164,15 +167,17 @@ demo-grafana:
 
 echo-links:
 	@echo "service graph: http://localhost:8088/dotviz"
-	@echo "tracing: http://localhost:16686"
+	@echo "jaeger-ui: http://localhost:16686"
 	@echo "grafana: http://localhost:3000"
 	@echo "prometheus http://locahost:9090"
+	@echo "zipkin http://locahost:8998"
 
 demo-monitoring: echo-links
 	$(shell kubectl -n istio-system port-forward $(JAEGER_POD_NAME) 16686:16686 \
 	& kubectl -n istio-system port-forward $(SERVICEGRAPH_POD_NAME) 8088:8088 \
 	& kubectl -n istio-system port-forward $(GRAFANA_POD_NAME) 3000:3000 \
-	& kubectl -n istio-system port-forward $(PROMETHEUS_POD_NAME) 9090:9090)
+	& kubectl -n istio-system port-forward $(PROMETHEUS_POD_NAME) 9090:9090 \
+	& kubectl -n istio-system port-forward $(ZIPKIN_POD_NAME) 8998:80)
 
 ui-v2:
 	kubectl apply -f ./kube/ui-v2/ui-app-v2.yml
@@ -204,3 +209,9 @@ i-debug:
 	# kubectl describe pods -n istio-system
 	# kubectl logs pods -n istio-system
 	# kubectl describe deployment
+
+k-ctx:
+	kubectl config set-context $(shell kubectl config current-context) --namespace=$(K8S_NAMESPACE)
+
+k-edit-pilot:
+	kubectl -n istio-system edit deploy istio-pilot
