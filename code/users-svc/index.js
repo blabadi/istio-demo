@@ -11,6 +11,9 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/user/:id', async (req, res) => {
+  console.log('in /user/:id')
+  console.log(` params : ${req.params} headers: ${JSON.stringify(req.headers)}`);
+  
   return res.json({
     name: "bashar"
   })

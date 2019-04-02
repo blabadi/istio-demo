@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,8 +47,10 @@ class OrdersController {
 	String baseShippingUrl;
 	
 	@GetMapping("order")
-	public Mono<Order> orders(@RequestParam String userId) {
+	public Mono<Order> orders(@RequestParam String userId, ServerHttpRequest serverHttpRequest) {
 		logger.trace(">>>>>>>>>>>>>>>>>>>>>>>> IN ORDERS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+		logger.trace(" userID :{}, headers : {}", userId, serverHttpRequest.getHeaders());
+		
 		String id = UUID.randomUUID().toString();
 		return webClient
 			.get()

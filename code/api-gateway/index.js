@@ -15,6 +15,8 @@ app.get('/', async (req, res) => {
 app.get('/api/user/:id/orders', async (req, res) => {
   let user;
   let order;
+  console.log('in /api/user/:id/orders')
+  console.log(` params : ${req.params} headers: ${JSON.stringify(req.headers)}`);
   const headers = forwardTraceHeaders(req)
   try {
     user = await callUserService(headers);
@@ -58,7 +60,7 @@ function forwardTraceHeaders(req) {
 		'x-b3-sampled',
 		'x-b3-flags',
 		'x-ot-span-context',
-		'x-snowflake',
+		'x-end-user',
 	]
 	const headers = {}
 	for (let h of incoming_headers) {
