@@ -8,7 +8,7 @@ spec:
   ports:
   - port: 80
     targetPort: 3000
-    name: http
+    name: http # important to have named ports for istio https://istio.io/docs/setup/kubernetes/prepare/requirements/
 ---
 apiVersion: v1
 kind: Service
