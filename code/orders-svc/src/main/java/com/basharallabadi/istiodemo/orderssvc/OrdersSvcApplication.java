@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.*;
@@ -47,14 +48,30 @@ class OrdersController {
 	String baseShippingUrl;
 	
 	@GetMapping("order")
-	public Mono<Order> orders(@RequestParam String userId, ServerHttpRequest serverHttpRequest) {
+	public Mono<Order> orders(@RequestParam String userId, ServerHttpRequest serverHttpRequest,
+							  @RequestHeader(value = "x-request-id", required = false) String xreq,
+							  @RequestHeader(name="x-b3-traceid", required = false) String xtraceid,
+							  @RequestHeader(name="x-b3-spanid", required = false) String xspanid,
+							  @RequestHeader(name="x-b3-parentspanid", required = false) String xparentspanid,
+							  @RequestHeader(name="x-b3-sampled", required = false) String xsampled,
+							  @RequestHeader(name="x-b3-flags", required = false) String xflags,
+							  @RequestHeader(name="x-ot-span-context", required = false) String xotspan) {
+
 		logger.trace(">>>>>>>>>>>>>>>>>>>>>>>> IN ORDERS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 		logger.trace(" userID :{}, headers : {}", userId, serverHttpRequest.getHeaders());
-		
+		logger.trace(" requestId:{} ", xreq);
+
 		String id = UUID.randomUUID().toString();
 		return webClient
 			.get()
 			.uri(baseShippingUrl + "/shipping/" + id + "/status")
+			.header("x-request-id", xreq)
+			.header("x-b3-traceid", xtraceid)
+			.header("x-b3-spanid", xspanid)
+			.header("x-b3-parentspanid", xparentspanid)
+			.header("x-b3-sampled", xsampled)
+			.header("x-b3-flags", xflags)
+			.header("x-ot-span-context", xotspan)
 			.retrieve()
 			.bodyToMono(ShippingStatus.class)
 			.map((status) -> new Order(id, status));

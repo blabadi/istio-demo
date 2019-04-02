@@ -8,7 +8,7 @@ app.get('/', async (req, res) => {
   console.log(`${new Date()} in ui app, request gateway url ${GATEWAY_URL} `);
   let upResp;
   console.log('in /')
-  console.log(` params : ${req.params} headers: ${JSON.stringify(req.headers)}`);
+  console.log(` params : ${JSON.stringify(req.params)} headers: ${JSON.stringify(req.headers)}`);
   const headers = forwardTraceHeaders(req);
   try {
     upResp = await request({

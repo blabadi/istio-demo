@@ -16,7 +16,7 @@ app.get('/api/user/:id/orders', async (req, res) => {
   let user;
   let order;
   console.log('in /api/user/:id/orders')
-  console.log(` params : ${req.params} headers: ${JSON.stringify(req.headers)}`);
+  console.log(` params : ${JSON.stringify(req.params)} headers: ${JSON.stringify(req.headers)}`);
   const headers = forwardTraceHeaders(req)
   try {
     user = await callUserService(headers);

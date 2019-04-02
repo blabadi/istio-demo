@@ -24,7 +24,8 @@ ISTIO_GATEWAY_URL=$($(GATEWAY_TYPE)_GATEWAY_URL)
 
 
 ## Monitoring services
-ZIPKIN_POD_NAME=$(shell kubectl -n istio-system get pod -l app=jaeger -o jsonpath='{.items[0].metadata.name}')
+# for zipkin see: https://istio.io/docs/tasks/telemetry/distributed-tracing/zipkin/
+# ZIPKIN_POD_NAME=$(shell kubectl -n istio-system get pod -l app=jaeger -o jsonpath='{.items[0].metadata.name}')
 JAEGER_POD_NAME=$(shell kubectl -n istio-system get pod -l app=jaeger -o jsonpath='{.items[0].metadata.name}')
 SERVICEGRAPH_POD_NAME=$(shell kubectl -n istio-system get pod -l app=servicegraph -o jsonpath='{.items[0].metadata.name}')
 GRAFANA_POD_NAME=$(shell kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}')
@@ -66,6 +67,8 @@ d-push:
 	docker push basharlabadi/istio-demo.orders:1.0.0 
 	docker push basharlabadi/istio-demo.shipping:1.0.0
 
+redploy-all: d-build d-push
+
 step-1: init d-build d-push
 	echo "done step 1 (code + artifacts)"
 
@@ -75,7 +78,7 @@ step-1: init d-build d-push
 # download istio (locally to be used by kubectl)
 kluster:
 	kind create cluster --name=istio-demo --config=./KinD/kind-cluster.yaml
-	export KUBECONFIG="$(kind get kubeconfig-path --name="istio-demo")"
+	# export KUBECONFIG="$(kind get kubeconfig-path --name="istio-demo")"
 	kubectl cluster-info
 	
 i-get:
@@ -153,7 +156,8 @@ i-ingress:
 	kubectl apply -f ./istio/ingress.yml
 	kubectl get gateway
 
-i-deploy-initial: i-init k-deploy i-dest-rule i-routing-1 i-ingress
+# this does all the istio steps so far
+deploy-initial: k-deploy i-dest-rule i-routing-1 i-ingress
 
 
 # DEMO -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -169,15 +173,14 @@ echo-links:
 	@echo "service graph: http://localhost:8088/dotviz"
 	@echo "jaeger-ui: http://localhost:16686"
 	@echo "grafana: http://localhost:3000"
-	@echo "prometheus http://locahost:9090"
-	@echo "zipkin http://locahost:8998"
+	@echo "prometheus http://localhost:9090"
 
 demo-monitoring: echo-links
 	$(shell kubectl -n istio-system port-forward $(JAEGER_POD_NAME) 16686:16686 \
 	& kubectl -n istio-system port-forward $(SERVICEGRAPH_POD_NAME) 8088:8088 \
 	& kubectl -n istio-system port-forward $(GRAFANA_POD_NAME) 3000:3000 \
-	& kubectl -n istio-system port-forward $(PROMETHEUS_POD_NAME) 9090:9090 \
-	& kubectl -n istio-system port-forward $(ZIPKIN_POD_NAME) 8998:80)
+	& kubectl -n istio-system port-forward $(PROMETHEUS_POD_NAME) 9090:9090) 
+	
 
 ui-v2:
 	kubectl apply -f ./kube/ui-v2/ui-app-v2.yml
@@ -185,6 +188,16 @@ ui-v2:
 	kubectl apply -f ./istio/ui-v2/routing.header.yml
 	# kubectl apply -f ./istio/ui-v2/routing.weights.yml
 
+canary-header:
+	curl -X GET \
+        http://$(ISTIO_GATEWAY_URL)/ \
+        	-H 'cache-control: no-cache' \
+        	-H 'x-end-user: canary-user'
+
+faulty-shipping:
+	kubectl apply -f ./istio/fault-injection/shipping-dr.yml
+
+# if in the background
 stop-monitoring:
 	killall kubectl
 
@@ -197,8 +210,8 @@ i-remove:
 
 # undeploys pods only
 k-undeploy:
-	kubectl delete -f ./kube/resources.yml
-
+	-kubectl delete -f ./kube/resources.yml
+	-kubectl delete -f ./kube/ui-v2/ui-app-v2.yml
 
 
 # EXTRA STUFF -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -215,3 +228,16 @@ k-ctx:
 
 k-edit-pilot:
 	kubectl -n istio-system edit deploy istio-pilot
+
+redeploy-orders:
+	cd ./code/orders-svc && ./mvnw clean install
+	docker build -t basharlabadi/istio-demo.orders:1.0.0 ./code/orders-svc
+	docker push basharlabadi/istio-demo.orders:1.0.0 
+	kubectl delete deployments.apps orders
+	make k-deploy
+
+gen-traffic:
+	while true; do curl -sS http://$(ISTIO_GATEWAY_URL)/; sleep 0.3; done 
+
+stop-traffic:
+	killall make

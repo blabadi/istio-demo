@@ -11,6 +11,8 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/shipping/:orderid/status', async (req, res) => {
+  console.log('in /shipping/:orderid/status')
+  console.log(`params : ${JSON.stringify(req.params)} headers: ${JSON.stringify(req.headers)}`);
   res.json({
     status: 'shipped'
   })

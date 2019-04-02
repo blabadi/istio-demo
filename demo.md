@@ -11,8 +11,7 @@
     - istio-proxy `kubectl describe pods frontend`
 - test pods communication `make k-test`
 - deploy istio app configs:
-    - `make i-deploy-initial`
-    - Or one by one:
+    - one by one:
         - `make i-dest-rule`
         - `make i-routing-1`
         - `make i-ingress`
@@ -20,4 +19,23 @@
     - ingress url source
 
 ## features:
-- Grafana `make demo-grafana`
+
+### monitoring
+`make demo-monitoring`
+- Grafana : http://localhost:3000
+- Jaeger UI : http://localhost:16686/jaeger/
+- promethus : http://localhost:9090/graph
+- service graph: http://localhost:8088/dotviz
+
+### traffic management:
+- canary deployment: `make ui-v2`
+    - compare `make demo-frontend` with canary : `make canary-header` 
+
+- gradual rollout: `kubectl apply -f ./istio/ui-v2/routing.weights.yml`
+    - v2 at 0%, v1 : 100% .. gradually shift traffic 
+
+- fault injection: `make faulty-shipping`
+    - `make gen-traffic &`
+    - check monitors
+    - `make stop-traffic`
+
