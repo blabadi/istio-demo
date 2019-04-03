@@ -1,6 +1,6 @@
 # Demo script (Monitoring And Traffic Management)
 ## Usage
-- Microservices code is in ./code
+- Microservices code is in ./code,
   services hierarchy
   ```yaml
     ui: nodeJS
