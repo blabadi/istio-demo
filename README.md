@@ -18,7 +18,7 @@ How we ended up here ?
 
 breaking from monolith to distributed lead to:
 ![](./img/needs.png)
-
+* http://www.ofbizian.com/2017/02/microservices-hierarchy-of-needs.html
 ---
 
 ![](./img/k8s.jpg)
