@@ -1,11 +1,27 @@
 # Demo script (Monitoring And Traffic Management)
+## Usage
+- Microservices code is in ./code
+  services hierarchy
+  ```yaml
+    ui: nodeJS
+      gateway: nodeJS
+        orders: java
+          shipping: nodeJS
+        users: nodeJS
+  ```
+- Istio resources under ./istio
+  - subdirectories contains resources for different features of istio
+- kubernetes resources under ./kube
+- Makefile contains bash snippets useful to save typing time
 
-## setup
+  next is a step by step guide to run this demo.
+
+## Setup
  - start cluster `make kluster`
  - start istio core services `make i-init`
     - show isito services & pods `make k-print`
 
-## deployment 
+## Deployment 
 - deploy the initial pods & services : `make k-deploy`
     - show auto injection (each pod has 2 containers)
     - istio-proxy `kubectl describe pods frontend`
@@ -18,21 +34,21 @@
 - confirm deployment works: `make demo-frontend`
     - ingress url source
 
-## features:
+## Features:
 
-### networking 
+### Networking 
     - service discovery
     - routing
-    - enforce polices & security
+    - enforce network polices & security
 
-### monitoring
+### Monitoring
 `make demo-monitoring`
 - Grafana : http://localhost:3000
 - Jaeger UI : http://localhost:16686/jaeger/
 - promethus : http://localhost:9090/graph
 - service graph: http://localhost:8088/dotviz
 
-### traffic management:
+### Traffic management:
 - load balancing:
     - see `istio/destinations.yml` => `dr.gateway `
 - canary deployment: `make ui-v2`
@@ -57,6 +73,11 @@
     - check jaeger for shadow requests
     - `make rm-mirror-frontend`
 
-
 - circuit breaking
+    - connection pools
+    - outlier detection
+    see `./istio/circuit-breaker/shipping-cb.dr.yml`
 
+references:
+  - istio doc 
+  - sample project https://github.com/thesandlord/Istio101
