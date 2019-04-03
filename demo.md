@@ -18,6 +18,7 @@
 
 ## Setup
  - start cluster `make kluster`
+    - this uses https://github.com/kubernetes-sigs/kind
  - start istio core services `make i-init`
     - show isito services & pods `make k-print`
 

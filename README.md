@@ -1,6 +1,6 @@
+<!-- $theme: default -->
 ---
-marp: true
----
+<!--marp: true-->
 # Istio
 
 Istio lets you connect, secure, control, and observe services
@@ -29,14 +29,12 @@ breaking from monolith to distributed lead to:
 ![](./img/3fd.jpg)
 
 ---
+All that lead to this point of time where we have CNCF
 
 ![Way to the cloud](./img/history.png)
 
 ---
 
-![Development stack maturity](./img/maturty.png)
-
----
 Now imagine if we can give each container a **helper** that handles some of the needs above (load balancing, timeouts, traffic encryption, and much more) **without changing** our container code or even knowing what's inside it
 
 that's called side car pattern in distributed systems, and with k8s it became generic enough to implement a framework based on it
@@ -106,6 +104,7 @@ spec:
   - match:
     - uri:
         prefix: "/wpcatalog"
+    # or
     - uri:
         prefix: "/consumercatalog"
     rewrite:

@@ -67,7 +67,7 @@ d-push:
 	docker push basharlabadi/istio-demo.orders:1.0.0 
 	docker push basharlabadi/istio-demo.shipping:1.0.0
 
-redploy-all: d-build d-push
+rebuild-all: d-build d-push
 
 step-1: init d-build d-push
 	echo "done step 1 (code + artifacts)"
