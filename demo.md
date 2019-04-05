@@ -80,5 +80,5 @@
     see `./istio/circuit-breaker/shipping-cb.dr.yml`
 
 references:
-  - istio doc 
+  - istio doc https://istio.io
   - sample project https://github.com/thesandlord/Istio101
