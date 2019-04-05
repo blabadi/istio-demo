@@ -59,7 +59,7 @@
     - v2 at 0%, v1 : 100% .. gradually shift traffic 
 
 - fault injection: `make faulty-shipping`
-    - `make gen-traffic &`
+    - `make gen-traffic`
     - check monitors
     - `make stop-traffic` or ^C
     - remove fault injection: `make rm-faulty-shipping`
